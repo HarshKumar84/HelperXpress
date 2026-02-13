@@ -1,15 +1,15 @@
 /* Helper Card Styles */
 .helper-card {
-  background: white;
+  background: #1e1e2e;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   border: 2px solid transparent;
 }
 
 .helper-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   border-color: #667eea;
   transform: translateY(-4px);
 }
@@ -40,13 +40,13 @@
 .helper-name {
   font-size: 18px;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   margin: 0;
 }
 
 .verified-badge {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #1e4620;
+  color: #81c784;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -56,7 +56,7 @@
 .helper-stats {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #404040;
 }
 
 .stat {
@@ -79,24 +79,24 @@
 }
 
 .star.empty {
-  color: #ddd;
+  color: #404040;
 }
 
 .rating-text {
   font-size: 12px;
-  color: #666;
+  color: #b0b0b0;
   margin-left: 4px;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #999;
+  color: #b0b0b0;
   margin-left: 4px;
 }
 
 .experience {
   font-size: 14px;
-  color: #666;
+  color: #b0b0b0;
 }
 
 .helper-details-main {
@@ -108,11 +108,11 @@
   justify-content: space-between;
   padding: 8px 0;
   font-size: 13px;
-  color: #666;
+  color: #b0b0b0;
 }
 
 .detail-row.highlight {
-  background-color: #f5f5f5;
+  background-color: #16213e;
   padding: 8px 12px;
   border-radius: 6px;
   border-left: 3px solid #667eea;
@@ -120,11 +120,11 @@
 
 .detail-row .label {
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
 }
 
 .detail-row .value {
-  color: #666;
+  color: #b0b0b0;
   text-align: right;
   flex: 1;
   margin-left: 12px;
@@ -133,13 +133,13 @@
 .helper-skills {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #404040;
 }
 
 .skills-label {
   display: block;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   margin-bottom: 8px;
   font-size: 13px;
 }
@@ -151,8 +151,8 @@
 }
 
 .skill-tag {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: #0d47a1;
+  color: #64b5f6;
   padding: 4px 10px;
   border-radius: 16px;
   font-size: 12px;
@@ -176,26 +176,26 @@
 
 .divider {
   height: 1px;
-  background-color: #eee;
+  background-color: #404040;
   margin: 16px 0;
 }
 
 .extended-info {
   padding: 8px 0;
   font-size: 13px;
-  color: #666;
+  color: #b0b0b0;
   margin: 0;
 }
 
 .extended-info strong {
-  color: #333;
+  color: #ffffff;
   margin-right: 8px;
 }
 
 .btn-details {
   width: 100%;
   padding: 10px;
-  background-color: #f5f5f5;
+  background-color: #16213e;
   border: none;
   border-radius: 6px;
   color: #667eea;
@@ -207,7 +207,7 @@
 }
 
 .btn-details:hover {
-  background-color: #ececec;
+  background-color: #1a2952;
 }
 
 .helper-actions {
@@ -229,8 +229,8 @@
 }
 
 .btn-reject {
-  background-color: #ffebee;
-  color: #f44336;
+  background-color: #3d1f1f;
+  color: #ef5350;
   border: 2px solid #f44336;
 }
 

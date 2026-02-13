@@ -11,8 +11,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f7fa;
-  color: #333;
+  background-color: #0a0e27;
+  color: #ffffff;
 }
 
 html {
@@ -24,13 +24,13 @@ html {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background-color: #0a0e27;
 }
 
 /* Header */
 .app-header {
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -68,14 +68,17 @@ html {
 .logo h1 {
   font-size: 24px;
   font-weight: 700;
-  color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
   letter-spacing: -0.5px;
 }
 
 .tagline {
   font-size: 10px;
-  color: #999;
+  color: #888;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -89,14 +92,15 @@ html {
 .nav-btn {
   padding: 8px 16px;
   background-color: transparent;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #404040;
   border-radius: 6px;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #666;
+  color: #b0b0b0;
 }
+
 
 .nav-btn:hover {
   border-color: #667eea;
@@ -149,9 +153,9 @@ html {
 /* Main Content */
 .app-main {
   flex: 1;
-  max-width: 1400px;
   width: 100%;
-  margin: 0 auto;
+  display: block;
+  min-height: calc(100vh - 80px);
 }
 
 /* Assigned View */

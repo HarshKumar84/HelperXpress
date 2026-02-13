@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/HelperDashboard.css';
+import HelperLocation from './HelperLocation';
 
 const HelperDashboard = ({ helper, onStatusChange, onLogout }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -223,6 +224,12 @@ const HelperDashboard = ({ helper, onStatusChange, onLogout }) => {
           Job History
         </button>
         <button
+          className={`tab-btn ${activeTab === 'location' ? 'active' : ''}`}
+          onClick={() => setActiveTab('location')}
+        >
+          📍 Location
+        </button>
+        <button
           className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
           onClick={() => setActiveTab('reviews')}
         >
@@ -313,6 +320,13 @@ const HelperDashboard = ({ helper, onStatusChange, onLogout }) => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Location Tracking Tab */}
+        {activeTab === 'location' && (
+          <div className="location-section">
+            <HelperLocation helperId={helper?.id || 'H001'} />
           </div>
         )}
 

@@ -25,13 +25,13 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 };
 
 /**
- * Get user's current GPS location
+ * Get user's current GPS location using browser geolocation
  * @returns {Promise<{lat: number, lng: number}>} User's coordinates
  */
 export const getUserLocation = () => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported'));
+      reject(new Error('Geolocation is not supported by this browser'));
       return;
     }
 
@@ -43,10 +43,55 @@ export const getUserLocation = () => {
         });
       },
       (error) => {
-        reject(error);
+        console.error('Geolocation error:', error);
+        reject(new Error(`Geolocation error: ${error.message}`));
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
       }
     );
   });
+};
+
+/**
+ * Watch user's location in real-time
+ * @param {Function} callback - Function to call when location updates
+ * @returns {number} Watch ID for stopping tracking later
+ */
+export const watchUserLocation = (callback) => {
+  if (!navigator.geolocation) {
+    console.error('Geolocation is not supported');
+    return null;
+  }
+
+  return navigator.geolocation.watchPosition(
+    (position) => {
+      callback({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+    },
+    (error) => {
+      console.error('Watch location error:', error);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+};
+
+/**
+ * Stop watching user location
+ * @param {number} watchId - Watch ID returned from watchUserLocation
+ */
+export const stopWatchingLocation = (watchId) => {
+  if (watchId !== null && navigator.geolocation) {
+    navigator.geolocation.clearWatch(watchId);
+  }
 };
 
 /**
@@ -67,4 +112,89 @@ export const isValidCoordinates = (lat, lng) => {
 export const isWithin15Minutes = (distance) => {
   const maxDistance = 15; // km (assuming 60km/h = 1km/min)
   return distance <= maxDistance;
+};
+/**
+ * Find nearest helper from list of helpers
+ * @param {Object} userLocation - User's {lat, lng}
+ * @param {Array} helpers - Array of helper objects with {location: {lat, lng}}
+ * @returns {Object|null} Nearest helper with distance, or null if none found
+ */
+export const findNearestHelper = (userLocation, helpers) => {
+  if (!helpers || helpers.length === 0) return null;
+
+  let nearestHelper = null;
+  let minDistance = Infinity;
+
+  helpers.forEach((helper) => {
+    if (!helper.location || !isValidCoordinates(helper.location.lat, helper.location.lng)) {
+      return; // Skip invalid locations
+    }
+
+    const distance = calculateDistance(
+      userLocation.lat,
+      userLocation.lng,
+      helper.location.lat,
+      helper.location.lng
+    );
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestHelper = {
+        ...helper,
+        distance: minDistance,
+        distanceText: `${minDistance.toFixed(2)} km`,
+      };
+    }
+  });
+
+  return nearestHelper;
+};
+
+/**
+ * Find all helpers within specified radius
+ * @param {Object} userLocation - User's {lat, lng}
+ * @param {Array} helpers - Array of helper objects
+ * @param {number} radiusKm - Search radius in kilometers
+ * @returns {Array} Helpers within radius, sorted by distance (nearest first)
+ */
+export const findHelpersWithinRadius = (userLocation, helpers, radiusKm = 15) => {
+  if (!helpers || helpers.length === 0) return [];
+
+  const helpersInRadius = helpers
+    .map((helper) => {
+      if (!helper.location || !isValidCoordinates(helper.location.lat, helper.location.lng)) {
+        return null;
+      }
+
+      const distance = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        helper.location.lat,
+        helper.location.lng
+      );
+
+      if (distance <= radiusKm) {
+        return {
+          ...helper,
+          distance,
+          distanceText: `${distance.toFixed(2)} km`,
+        };
+      }
+      return null;
+    })
+    .filter((helper) => helper !== null)
+    .sort((a, b) => a.distance - b.distance);
+
+  return helpersInRadius;
+};
+
+/**
+ * Calculate ETA (Estimated Time of Arrival) based on distance
+ * @param {number} distanceKm - Distance in kilometers
+ * @param {number} speedKmh - Average speed in km/h (default: 60)
+ * @returns {number} ETA in minutes
+ */
+export const calculateETA = (distanceKm, speedKmh = 60) => {
+  const minutes = Math.ceil((distanceKm / speedKmh) * 60);
+  return Math.min(minutes, 15); // Cap at 15 minutes
 };

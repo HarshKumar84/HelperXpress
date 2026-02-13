@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BookingProvider, useBooking } from './context/BookingContext';
 import { HelperProvider, useHelper } from './context/HelperContext';
-import { calculateETA } from './utils/matchingAlgorithm';
+import { calculateETA, ensureHelperAvailable } from './utils/matchingAlgorithm';
 import { BOOKING_STATUS } from './utils/constants';
 import BookingForm from './Components/BookingForm';
 import HelperCard from './Components/HelperCard';
@@ -10,6 +10,7 @@ import CompletionModal from './Components/CompletionModal';
 import BookingHistory from './Components/BookingHistory';
 import AdminDashboard from './Components/AdminDashboard';
 import UserDashboard from './Components/UserDashboard';
+import UserHomeDashboard from './Components/UserHomeDashboard';
 import HelperDashboard from './Components/HelperDashboard';
 import LoginForm from './Components/LoginForm';
 import RegistrationForm from './Components/RegistrationForm';
@@ -75,15 +76,53 @@ function AppContent() {
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const booking = createBooking(bookingData, helpers);
+      // Log the booking details for verification
+      console.log('📋 Booking Request:', {
+        service: bookingData.service,
+        location: bookingData.userLocation,
+        totalHelpersAvailable: helpers.length,
+      });
 
-      if (booking.assignedHelper) {
+      // Use ensureHelperAvailable to ALWAYS assign a helper
+      // Either finds existing helper within 15 min OR auto-assigns new worker
+      const assignedWorker = await ensureHelperAvailable(
+        bookingData.userLocation,
+        bookingData.service,
+        currentUser?.id || 'user-' + Date.now(),
+        helpers
+      );
+
+      if (assignedWorker) {
+        // Log successful assignment
+        console.log('✅ Worker Assigned:', {
+          workerName: assignedWorker.name,
+          workerId: assignedWorker.id,
+          serviceType: bookingData.service,
+          workerSkills: assignedWorker.skills,
+          rating: assignedWorker.rating,
+          experience: assignedWorker.experience,
+        });
+
+        // Create booking with assigned worker
+        const booking = createBooking(bookingData, helpers);
+        
+        // If no existing helper found, update with new worker assignment
+        if (!booking.assignedHelper && assignedWorker.isNewWorker) {
+          booking.assignedHelper = assignedWorker;
+          booking.status = BOOKING_STATUS.ASSIGNED;
+          booking.eta = assignedWorker.eta || 15;
+        }
+        
         setAppState('assigned');
       } else {
-        setError('No available helpers in your area within 15 minutes');
+        // Fallback: still create booking even if assignment failed
+        console.warn('⚠️ No worker assigned, creating booking in pending state');
+        const booking = createBooking(bookingData, helpers);
+        setError('Finding available helper... Please wait.');
         setAppState('booking');
       }
     } catch (err) {
+      console.error('❌ Booking Error:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -217,6 +256,15 @@ function AppContent() {
     }
   };
 
+  const handleHelperModeClick = () => {
+    // Allow user to switch to helper/worker mode
+    if (!currentHelper) {
+      alert('Please create a worker profile first');
+      return;
+    }
+    setShowWorkerDashboard(true);
+  };
+
   const handleLogoClickOnAuthPage = () => {
     // Quick demo login with user account when clicking logo on auth pages
     const demoUser = {
@@ -344,9 +392,22 @@ function AppContent() {
           <AdminDashboard />
         )}
         
-        {!showWorkerDashboard && appState === 'dashboard' && !showAdminDashboard && (
+        {/* Authenticated User Home Dashboard */}
+        {!showWorkerDashboard && appState === 'dashboard' && !showAdminDashboard && currentUser && (
+          <UserHomeDashboard
+            user={currentUser}
+            stats={stats}
+            recentBookings={recentBookings}
+            onNewBooking={() => setAppState('booking')}
+            onAdminClick={() => setShowAdminDashboard(true)}
+            onLogout={handleLogout}
+            onHelperModeClick={handleHelperModeClick}
+          />
+        )}
+
+        {/* Public Dashboard (Overview for non-logged-in users) */}
+        {!showWorkerDashboard && appState === 'dashboard' && !showAdminDashboard && !currentUser && (
           <UserDashboard
-            // Pass full registration details so dashboard can show them
             user={currentUser}
             stats={stats}
             recentBookings={recentBookings}
