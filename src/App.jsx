@@ -157,22 +157,49 @@ function AppContent() {
   };
 
   const handleLoginComplete = (user) => {
+    // Save logged-in user (either normal user or worker)
     setCurrentUser(user);
+
+    // When a worker logs in, prepare their dashboard data using registration details
     if (user.role === 'worker') {
+      const baseHelper = helpers.find((h) => h.id === user.id) || helpers[0];
+
+      const enrichedHelper = {
+        ...baseHelper,
+        id: user.id,
+        name: user.fullName || baseHelper?.name,
+        phone: user.contactDetails || user.mobileNumber || baseHelper?.phone,
+        experience: user.experience || baseHelper?.experience || 'New',
+        // keep existing skills/location from mock data for now
+      };
+
       setCurrentHelper({
-        ...helpers.find(h => h.id === user.id) || helpers[0],
-        status: 'available'
+        ...enrichedHelper,
+        status: 'available',
       });
       setShowWorkerDashboard(true);
     }
   };
 
   const handleRegistrationComplete = (user) => {
+    // Save newly registered user
     setCurrentUser(user);
+
+    // For workers, immediately open the worker dashboard with their registration details
     if (user.role === 'worker') {
+      const baseHelper = helpers.find((h) => h.id === user.id) || helpers[0];
+
+      const enrichedHelper = {
+        ...baseHelper,
+        id: user.id,
+        name: user.fullName || baseHelper?.name,
+        phone: user.contactDetails || user.mobileNumber || baseHelper?.phone,
+        experience: user.experience || baseHelper?.experience || 'New',
+      };
+
       setCurrentHelper({
-        ...helpers.find(h => h.id === user.id) || helpers[0],
-        status: 'available'
+        ...enrichedHelper,
+        status: 'available',
       });
       setShowWorkerDashboard(true);
     }
@@ -319,7 +346,8 @@ function AppContent() {
         
         {!showWorkerDashboard && appState === 'dashboard' && !showAdminDashboard && (
           <UserDashboard
-            user={{ name: currentUser.fullName, phone: currentUser.mobileNumber || '+91 98765 43210' }}
+            // Pass full registration details so dashboard can show them
+            user={currentUser}
             stats={stats}
             recentBookings={recentBookings}
             onNewBooking={() => setAppState('booking')}

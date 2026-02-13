@@ -15,13 +15,29 @@ const UserDashboard = ({ user, stats, recentBookings, onNewBooking }) => {
     return emojis[status] || '•';
   };
 
+  const firstName =
+    user?.fullName?.split(' ')[0] ||
+    user?.name?.split(' ')[0] ||
+    'back';
+
+  const roleLabel = user?.role === 'worker' ? 'Worker' : 'User';
+
   return (
     <div className="user-dashboard">
       {/* Header */}
       <div className="dashboard-header">
         <div className="header-content">
-          <h1>Welcome back! 👋</h1>
-          <p className="header-subtitle">Quick access to your services</p>
+          <h1>Welcome {firstName}! 👋</h1>
+          <p className="header-subtitle">
+            {user ? (
+              <>
+                {roleLabel} • {user.city || user.location || 'City not set'} •{' '}
+                {user.mobileNumber || user.contactDetails || user.phone || 'Phone not set'}
+              </>
+            ) : (
+              'Quick access to your services'
+            )}
+          </p>
         </div>
         <button onClick={onNewBooking} className="btn-new-booking">
           + New Booking
