@@ -122,7 +122,19 @@ const RegistrationForm = ({ onRegistrationComplete, onToggleLogin, onLogoClick }
       const userData = {
         id: Date.now(),
         role,
-        ...formData,
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(), // Store email in lowercase for easier comparison
+        password: formData.password.trim(), // Store trimmed password
+        mobileNumber: formData.mobileNumber.trim(),
+        city: formData.city.trim(),
+        age: formData.age.trim(),
+        gender: formData.gender.trim(),
+        location: formData.location.trim(),
+        contactDetails: formData.contactDetails.trim(),
+        jobCategory: formData.jobCategory.trim(),
+        experience: formData.experience.trim(),
+        availability: formData.availability.trim(),
+        idProof: formData.idProof.trim(),
         registeredAt: new Date().toISOString()
       };
 

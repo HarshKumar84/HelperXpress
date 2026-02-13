@@ -27,9 +27,16 @@ const LoginForm = ({ onLoginComplete, onToggleRegister, onLogoClick }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1200));
 
+      // Trim email and password for comparison
+      const trimmedEmail = email.trim().toLowerCase();
+      const trimmedPassword = password.trim();
+
       // For demo: check if user exists in localStorage
       const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const user = storedUsers.find(u => u.email === email && u.password === password);
+      const user = storedUsers.find(u => 
+        u.email.toLowerCase().trim() === trimmedEmail && 
+        (u.password && u.password.trim()) === trimmedPassword
+      );
 
       if (user) {
         localStorage.setItem('currentUser', JSON.stringify(user));
@@ -37,7 +44,7 @@ const LoginForm = ({ onLoginComplete, onToggleRegister, onLogoClick }) => {
         onLoginComplete(user);
       } else {
         // Demo credentials for testing
-        if (email === "user@demo.com" && password === "password123") {
+        if (trimmedEmail === "user@demo.com" && trimmedPassword === "password123") {
           const demoUser = {
             id: 1,
             role: "user",
@@ -49,7 +56,7 @@ const LoginForm = ({ onLoginComplete, onToggleRegister, onLogoClick }) => {
           localStorage.setItem('currentUser', JSON.stringify(demoUser));
           localStorage.setItem('userRole', 'user');
           onLoginComplete(demoUser);
-        } else if (email === "worker@demo.com" && password === "password123") {
+        } else if (trimmedEmail === "worker@demo.com" && trimmedPassword === "password123") {
           const demoWorker = {
             id: 2,
             role: "worker",
