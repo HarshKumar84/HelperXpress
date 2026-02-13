@@ -10,6 +10,9 @@ import CompletionModal from './Components/CompletionModal';
 import BookingHistory from './Components/BookingHistory';
 import AdminDashboard from './Components/AdminDashboard';
 import UserDashboard from './Components/UserDashboard';
+import HelperDashboard from './Components/HelperDashboard';
+import LoginForm from './Components/LoginForm';
+import RegistrationForm from './Components/RegistrationForm';
 import './App.css';
 
 function AppContent() {
@@ -28,8 +31,26 @@ function AppContent() {
 
   const [appState, setAppState] = useState('dashboard'); // 'dashboard', 'booking', 'assigned', 'tracking', 'completion'
   const [showAdminDashboard, setShowAdminDashboard] = useState(false); // Toggle between user and admin dashboard
+  const [showWorkerDashboard, setShowWorkerDashboard] = useState(false); // Toggle worker dashboard
+  const [currentHelper, setCurrentHelper] = useState(null); // Current logged-in helper
+  const [workerStatus, setWorkerStatus] = useState('available'); // Worker availability status
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [authState, setAuthState] = useState('login'); // 'login', 'register'
+  const [currentUser, setCurrentUser] = useState(null); // Currently logged-in user
+
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setCurrentUser(user);
+      } catch (err) {
+        console.error('Error loading user:', err);
+      }
+    }
+  }, []);
 
   // Calculate stats
   const stats = {
@@ -121,53 +142,184 @@ function AppContent() {
     }
   };
 
+  const handleWorkerStatusChange = (status) => {
+    setWorkerStatus(status);
+    // In production, this would update the worker status in the backend
+  };
+
+  const handleWorkerLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      setCurrentHelper(null);
+      setShowWorkerDashboard(false);
+      setAppState('dashboard');
+      setWorkerStatus('offline');
+    }
+  };
+
+  const handleLoginComplete = (user) => {
+    setCurrentUser(user);
+    if (user.role === 'worker') {
+      setCurrentHelper({
+        ...helpers.find(h => h.id === user.id) || helpers[0],
+        status: 'available'
+      });
+      setShowWorkerDashboard(true);
+    }
+  };
+
+  const handleRegistrationComplete = (user) => {
+    setCurrentUser(user);
+    if (user.role === 'worker') {
+      setCurrentHelper({
+        ...helpers.find(h => h.id === user.id) || helpers[0],
+        status: 'available'
+      });
+      setShowWorkerDashboard(true);
+    }
+  };
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('userRole');
+      setCurrentUser(null);
+      setCurrentHelper(null);
+      setShowWorkerDashboard(false);
+      setAppState('dashboard');
+      setAuthState('login');
+    }
+  };
+
+  const handleLogoClickOnAuthPage = () => {
+    // Quick demo login with user account when clicking logo on auth pages
+    const demoUser = {
+      id: 1,
+      role: "user",
+      email: "user@demo.com",
+      fullName: "Demo User",
+      mobileNumber: "9876543210",
+      city: "Delhi"
+    };
+    localStorage.setItem('currentUser', JSON.stringify(demoUser));
+    localStorage.setItem('userRole', 'user');
+    setCurrentUser(demoUser);
+  };
+
   // Render different app states
   return (
     <div className="app">
-      {/* Header */}
-      <header className="app-header">
-        <div className="header-container">
-          <div className="logo">
-            <span className="logo-emoji">⚡</span>
-            <h1>HelperXpress</h1>
-            <span className="tagline">15-Minute Guaranteed Service</span>
-          </div>
-          <nav className="nav-buttons">
-            <button
-              className={`nav-btn ${appState === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setAppState('dashboard')}
-            >
-              🏠 Dashboard
-            </button>
-            <button
-              className={`nav-btn ${appState === 'booking' ? 'active' : ''}`}
-              onClick={() => setAppState('booking')}
-            >
-              📋 New Booking
-            </button>
-            {appState === 'dashboard' && (
-              <button
-                className="nav-btn admin-toggle"
-                onClick={() => setShowAdminDashboard(!showAdminDashboard)}
-                title="Toggle Admin/User Dashboard"
-              >
-                {showAdminDashboard ? '👤' : '⚙️'} {showAdminDashboard ? 'User' : 'Admin'} View
-              </button>
-            )}
-          </nav>
-        </div>
-      </header>
+      {/* Authentication Screen */}
+      {!currentUser && (
+        <>
+          {authState === 'login' && (
+            <LoginForm
+              onLoginComplete={handleLoginComplete}
+              onToggleRegister={() => setAuthState('register')}
+              onLogoClick={handleLogoClickOnAuthPage}
+            />
+          )}
+          {authState === 'register' && (
+            <RegistrationForm
+              onRegistrationComplete={handleRegistrationComplete}
+              onToggleLogin={() => setAuthState('login')}
+              onLogoClick={handleLogoClickOnAuthPage}
+            />
+          )}
+        </>
+      )}
+
+      {/* Main Application */}
+      {currentUser && (
+        <>
+          {/* Header */}
+          <header className="app-header">
+            <div className="header-container">
+              <div className="logo">
+                <span className="logo-emoji">⚡</span>
+                <h1>HelperXpress</h1>
+                <span className="tagline">15-Minute Guaranteed Service</span>
+              </div>
+              <nav className="nav-buttons">
+                <span className="user-info">👤 {currentUser.fullName} ({currentUser.role})</span>
+                <button
+                  className={`nav-btn ${appState === 'dashboard' ? 'active' : ''}`}
+                  onClick={() => {
+                    setShowWorkerDashboard(false);
+                    setAppState('dashboard');
+                  }}
+                >
+                  🏠 Dashboard
+                </button>
+                {currentUser.role === 'user' && (
+                  <button
+                    className={`nav-btn ${appState === 'booking' ? 'active' : ''}`}
+                    onClick={() => {
+                      setShowWorkerDashboard(false);
+                      setAppState('booking');
+                    }}
+                  >
+                    📋 New Booking
+                  </button>
+                )}
+                {currentUser.role === 'worker' && (
+                  <button
+                    className={`nav-btn ${showWorkerDashboard ? 'active' : ''}`}
+                    onClick={() => {
+                      if (!currentHelper && helpers.length > 0) {
+                        setCurrentHelper({
+                          ...helpers[0],
+                          status: 'available'
+                        });
+                      }
+                      setShowWorkerDashboard(!showWorkerDashboard);
+                    }}
+                    title="Worker Portal"
+                  >
+                    👷 My Portal
+                  </button>
+                )}
+                {appState === 'dashboard' && currentUser.role === 'user' && !showWorkerDashboard && (
+                  <button
+                    className="nav-btn admin-toggle"
+                    onClick={() => setShowAdminDashboard(!showAdminDashboard)}
+                    title="Toggle Admin/User Dashboard"
+                  >
+                    {showAdminDashboard ? '👤' : '⚙️'} {showAdminDashboard ? 'User' : 'Admin'} View
+                  </button>
+                )}
+                <button
+                  className="nav-btn logout-btn"
+                  onClick={handleLogout}
+                  title="Logout"
+                >
+                  🚪 Logout
+                </button>
+              </nav>
+            </div>
+          </header>
 
       {/* Main Content */}
       <main className="app-main">
+        {/* Worker Dashboard View */}
+        {showWorkerDashboard && currentHelper && (
+          <HelperDashboard
+            helper={{
+              ...currentHelper,
+              status: workerStatus
+            }}
+            onStatusChange={handleWorkerStatusChange}
+            onLogout={handleWorkerLogout}
+          />
+        )}
+
         {/* Dashboard View */}
-        {appState === 'dashboard' && showAdminDashboard && (
+        {!showWorkerDashboard && appState === 'dashboard' && showAdminDashboard && (
           <AdminDashboard />
         )}
         
-        {appState === 'dashboard' && !showAdminDashboard && (
+        {!showWorkerDashboard && appState === 'dashboard' && !showAdminDashboard && (
           <UserDashboard
-            user={{ name: 'User', phone: '+91 98765 43210' }}
+            user={{ name: currentUser.fullName, phone: currentUser.mobileNumber || '+91 98765 43210' }}
             stats={stats}
             recentBookings={recentBookings}
             onNewBooking={() => setAppState('booking')}
@@ -175,12 +327,12 @@ function AppContent() {
         )}
 
         {/* Booking Form View */}
-        {appState === 'booking' && (
+        {!showWorkerDashboard && appState === 'booking' && currentUser.role === 'user' && (
           <BookingForm onBookingSubmit={handleBookingSubmit} isLoading={isLoading} />
         )}
 
         {/* Helper Assigned View */}
-        {appState === 'assigned' && currentBooking?.assignedHelper && (
+        {!showWorkerDashboard && appState === 'assigned' && currentBooking?.assignedHelper && (
           <div className="assigned-view">
             <div className="assigned-container">
               <h2 className="assigned-title">✓ Helper Found!</h2>
@@ -214,7 +366,7 @@ function AppContent() {
         )}
 
         {/* Tracking View */}
-        {(appState === 'tracking' || currentBooking?.status === BOOKING_STATUS.IN_PROGRESS) &&
+        {!showWorkerDashboard && (appState === 'tracking' || currentBooking?.status === BOOKING_STATUS.IN_PROGRESS) &&
           currentBooking?.assignedHelper && (
             <div className="tracking-view">
               <RealTimeTracking
@@ -252,7 +404,7 @@ function AppContent() {
           )}
 
         {/* Completion Modal */}
-        {appState === 'completion' && currentBooking?.assignedHelper && (
+        {!showWorkerDashboard && appState === 'completion' && currentBooking?.assignedHelper && (
           <CompletionModal
             helper={currentBooking.assignedHelper}
             booking={currentBooking}
@@ -277,7 +429,7 @@ function AppContent() {
       </main>
 
       {/* Sidebar with Booking History */}
-      {appState !== 'booking' && appState !== 'assigned' && appState !== 'tracking' && (
+      {!showWorkerDashboard && appState !== 'booking' && appState !== 'assigned' && appState !== 'tracking' && (
         <aside className="booking-history-sidebar">
           <BookingHistory bookings={bookings} />
         </aside>
@@ -295,6 +447,8 @@ function AppContent() {
           </div>
         </div>
       </footer>
+        </>
+      )}
     </div>
   );
 }

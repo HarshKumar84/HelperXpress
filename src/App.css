@@ -121,6 +121,31 @@ html {
   transform: scale(1.05);
 }
 
+.user-info {
+  padding: 8px 16px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  border: none;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.logout-btn:hover {
+  border-color: transparent;
+  opacity: 0.9;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
 /* Main Content */
 .app-main {
   flex: 1;
@@ -442,6 +467,27 @@ html {
 
   .app-footer {
     padding: 20px 16px;
+  }
+
+  .header-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .nav-buttons {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-btn, .user-info {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .user-info {
+    width: 100%;
+    text-align: center;
   }
 }
 
