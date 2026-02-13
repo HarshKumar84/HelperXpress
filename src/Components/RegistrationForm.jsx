@@ -126,8 +126,14 @@ const RegistrationForm = ({ onRegistrationComplete, onToggleLogin, onLogoClick }
         registeredAt: new Date().toISOString()
       };
 
+      // Save to currentUser for immediate login
       localStorage.setItem('currentUser', JSON.stringify(userData));
       localStorage.setItem('userRole', role);
+
+      // Save to registeredUsers array for future logins
+      const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const updatedUsers = [...existingUsers, userData];
+      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
       // Call parent callback
       onRegistrationComplete(userData);
